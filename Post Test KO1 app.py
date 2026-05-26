@@ -98,7 +98,7 @@ elif pereaksi == "Pereaksi Lucas (ZnCl2 / HCl)":
 # 3. TOLLENS
 elif pereaksi == "Pereaksi Tollens":
     if senyawa == "Formaldehida":
-        hasil = "(+) Terbentuk Cermin Perak"
+        hasil = "(+) Terbentu Cermin Perak"
         reaksi = "R-CHO + 2[Ag(NH₃)₂]⁺ + 3OH⁻ → R-COO⁻ + 2Ag↓ + 4NH₃ + 2H₂O"
         pembahasan = "✅ <b>Kenapa bereaksi:</b> Gugus aldehid sangat mudah dioksidasi. Ia mampu mereduksi ion perak kompleks menjadi logam perak murni (Ag) yang menempel mengkilap di dinding tabung."
     elif senyawa == "Aseton":
