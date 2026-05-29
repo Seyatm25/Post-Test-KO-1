@@ -4,7 +4,7 @@ import time
 # ================= KONFIGURASI HALAMAN =================
 st.set_page_config(page_title="Flowchart Auto-Analyzer 2D", page_icon="🧪", layout="wide")
 
-# ================= CSS UNTUK TABUNG 2D MURNI =================
+# ================= CSS UNTUK TABUNG 2D (DIPERLAMBAT) =================
 st.markdown("""
 <style>
     .tube-wrap { display: flex; justify-content: center; height: 350px; padding-top: 20px;}
@@ -18,14 +18,17 @@ st.markdown("""
         overflow: hidden;
         background: transparent;
     }
+    /* Animasi pergerakan cairan diperlambat menjadi 1.5 detik */
     .tube-liquid { 
         position: absolute; 
         bottom: 0; left: 0; right: 0; 
-        transition: height 0.5s ease, background 0.5s ease; 
+        transition: height 1.5s ease, background 1.5s ease; 
     }
     .precipitate-layer { position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background-color: rgba(0,0,0,0.5); }
     .cloudy-layer { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: rgba(255,255,255,0.6); }
-    .bubble-fx { position: absolute; background: rgba(0,0,0,0.2); border-radius: 50%; width: 8px; height: 8px; animation: floatUp 1.2s infinite ease-in; }
+    
+    /* Animasi gelembung diperlambat menjadi 2.0 detik */
+    .bubble-fx { position: absolute; background: rgba(0,0,0,0.2); border-radius: 50%; width: 8px; height: 8px; animation: floatUp 2.0s infinite ease-in; }
     @keyframes floatUp { 0% { bottom: 0px; opacity: 1; } 100% { bottom: 250px; opacity: 0; } }
 </style>
 """, unsafe_allow_html=True)
@@ -37,7 +40,7 @@ def render_tube(tinggi, warna, efek):
     elif efek == "cloudy":
         e_html = "<div class='cloudy-layer'></div>"
     elif efek == "bubbles":
-        e_html = "<div class='bubble-fx' style='left:20px;'></div><div class='bubble-fx' style='left:50px; animation-delay:0.4s;'></div>"
+        e_html = "<div class='bubble-fx' style='left:20px;'></div><div class='bubble-fx' style='left:50px; animation-delay:0.7s;'></div>"
         
     return f"<div class='tube-wrap'><div class='tube-glass'><div class='tube-liquid' style='height:{tinggi}; background:{warna};'>{e_html}</div></div></div>"
 
@@ -56,7 +59,6 @@ reagen_colors = {
 }
 
 # ================= ALUR LOGIKA SESUAI FLOWCHART =================
-# Menyimpan urutan spesifik pengujian untuk tiap senyawa berdasarkan decision tree
 flowchart_paths = {
     "1-Butanol": ["Ceric Nitrat", "Pereaksi Jones", "Pereaksi Lucas (Panas)"],
     "2-Butanol": ["Ceric Nitrat", "Pereaksi Jones", "Pereaksi Lucas (Panas)", "Uji Iodoform"],
@@ -68,7 +70,6 @@ flowchart_paths = {
     "Heksana": ["Ceric Nitrat", "Na-Bisulfit", "Hidroksilamin (Uji Ester)", "Uji Barit (NaHCO3)"]
 }
 
-# Menyimpan hasil dari masing-masing langkah untuk senyawa tersebut
 database_reaksi = {
     "1-Butanol": {
         "Ceric Nitrat": {"hasil": "(+) Merah Ceri", "alasan": "Positif gugus alkohol.", "warna_akhir": "#ef4444", "efek": "none"},
@@ -94,7 +95,7 @@ database_reaksi = {
     },
     "Aseton": {
         "Ceric Nitrat": {"hasil": "(-) Kuning", "alasan": "Bukan alkohol.", "warna_akhir": "#facc15", "efek": "none"},
-        "Na-Bisulfit": {"hasil": "(+) Emulsi/Endapan Putih", "alasan": "Golongan karbonil (keton) berekasi adisi.", "warna_akhir": "#ffffff", "efek": "precipitate"},
+        "Na-Bisulfit": {"hasil": "(+) Emulsi/Endapan Putih", "alasan": "Golongan karbonil (keton) bereaksi adisi.", "warna_akhir": "#ffffff", "efek": "precipitate"},
         "Pereaksi Fehling": {"hasil": "(-) Tetap Biru", "alasan": "Keton tidak memiliki sifat reduktor, mengeliminasi kemungkinan aldehid.", "warna_akhir": "#3b82f6", "efek": "none"},
         "Uji Iodoform": {"hasil": "(+) Endapan Kuning", "alasan": "Keton dengan gugus metil spesifik menghasilkan kristal iodoform.", "warna_akhir": "#fef08a", "efek": "precipitate"}
     },
@@ -120,7 +121,7 @@ database_reaksi = {
 
 # ================= UI UTAMA =================
 st.title("🔀 Smart Flowchart Auto-Analyzer 2D")
-st.write("Sistem ini mensimulasikan penelusuran **Skema Identifikasi Kualitatif** yang presisi. Mesin akan otomatis menavigasi jalur *decision tree* (Ceric Nitrat -> Jones -> Lucas, dst) untuk menemukan identitas senyawa.")
+st.write("Sistem ini mensimulasikan penelusuran **Skema Identifikasi Kualitatif** yang presisi. Mesin akan otomatis menavigasi jalur *decision tree* perlahan-lahan untuk menemukan identitas senyawa.")
 
 st.divider()
 
@@ -146,30 +147,30 @@ if st.button("Jalankan Alur Identifikasi 🚀", type="primary"):
         urutan_tes = flowchart_paths[senyawa]
         
         for i, pereaksi in enumerate(urutan_tes):
-            # 1. Animasi Kuras & Tambah Sampel
+            # 1. Animasi Kuras & Tambah Sampel (Jeda 1.5 detik)
             tube_placeholder.markdown(render_tube("30%", "#f1f5f9", "none"), unsafe_allow_html=True)
             status_placeholder.markdown(f"<div style='text-align:center;'><em>Menyiapkan sampel untuk {pereaksi}...</em></div>", unsafe_allow_html=True)
-            time.sleep(0.5)
+            time.sleep(1.5)
             
-            # 2. Animasi Memasukkan Reagen
+            # 2. Animasi Memasukkan Reagen (Jeda 2.0 detik)
             warna_reagen = reagen_colors[pereaksi]
             tube_placeholder.markdown(render_tube("65%", warna_reagen, "none"), unsafe_allow_html=True)
             status_placeholder.markdown(f"<div style='text-align:center;'><em>Meneteskan {pereaksi}...</em></div>", unsafe_allow_html=True)
-            time.sleep(0.8)
+            time.sleep(2.0)
             
-            # 3. Animasi Hasil Reaksi Akhir
+            # 3. Animasi Hasil Reaksi Akhir (Jeda 1.5 detik)
             res = database_reaksi[senyawa][pereaksi]
             tube_placeholder.markdown(render_tube("65%", res["warna_akhir"], res["efek"]), unsafe_allow_html=True)
-            status_placeholder.markdown(f"<div style='text-align:center; font-weight:bold;'>Selesai direaksikan!</div>", unsafe_allow_html=True)
-            time.sleep(0.6)
+            status_placeholder.markdown(f"<div style='text-align:center; font-weight:bold;'>Melihat hasil reaksi...</div>", unsafe_allow_html=True)
+            time.sleep(1.5)
             
-            # 4. Cetak Logbook
+            # 4. Cetak Logbook (Jeda 3.0 detik sebelum lanjut ke pereaksi berikutnya)
             if "(+)" in res["hasil"]:
                 log_container.success(f"**Tahap {i+1}: {pereaksi}** ➔ **{res['hasil']}**\n\n*Jalur Flowchart:* {res['alasan']}")
             else:
                 log_container.error(f"**Tahap {i+1}: {pereaksi}** ➔ **{res['hasil']}**\n\n*Jalur Flowchart:* {res['alasan']}")
             
-            time.sleep(1.2) 
+            time.sleep(3.0) 
             
         # Selesai: Kesimpulan Identifikasi
         status_placeholder.empty()
